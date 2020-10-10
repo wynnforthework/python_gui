@@ -90,6 +90,7 @@ class Application_ui(Frame):
 class Application(Application_ui):
     def __init__(self, master=None):
         Application_ui.__init__(self, master)
+        self._tk = master
 
     def Command1_Cmd(self, event=None):
         # print("保存")
@@ -106,7 +107,6 @@ class Application(Application_ui):
         if(len(self.ListData)==0):
             showwarning("运行","请先预览")
         else:
-            self.shellIndex = 0
             self.executeShell();
         pass
     
@@ -139,10 +139,10 @@ class Application(Application_ui):
         pass
     
     def executeShell(self):
-        if(self.shellIndex<len(self.ListData)):
-            os.system(self.ListData[self.shellIndex])
-            self.shellIndex += 1
-            self.executeShell();
+        str = ';'.join(self.ListData);
+        os.system(str)
+        #运行后自动关闭窗口
+        # self._tk.destroy();
         pass
 
 if __name__ == "__main__":
