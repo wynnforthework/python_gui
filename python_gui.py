@@ -49,7 +49,7 @@ class Application_ui(Frame):
         labelW = 0.1
         labelH = 0.05
         spaceH = 0.15
-        col = 4;
+        col = 4
         labelData = ["速度","加速度","左转弯","右转弯","刹车","油门","灯光","喇叭"];
         self.comboData = [["1","10","100","1000","10000","20000","50000","80000"],
                      ["2","10","100","1000","10000","20000","50000","80000"],
@@ -58,10 +58,10 @@ class Application_ui(Frame):
                      ["5","10","100","1000","10000","20000","50000","80000"],
                      ["6","10","100","1000","10000","20000","50000","80000"],
                      ["7","10","100","1000","10000","20000","50000","80000"],
-                     ["8","10","100","1000","10000","20000","50000","80000"]];
-        comboDefaultSelect = [0,0,0,0,0,0,0,0];
-        btnData = ["保存","重启","运行","预览"];
-        clickData = [self.Command1_Cmd,self.Command2_Cmd,self.Command3_Cmd,self.Command4_Cmd];
+                     ["8","10","100","1000","10000","20000","50000","80000"]]
+        comboDefaultSelect = [0,0,0,0,0,0,0,0]
+        btnData = ["保存","重启","运行","预览"]
+        clickData = [self.Command1_Cmd,self.Command2_Cmd,self.Command3_Cmd,self.Command4_Cmd]
         self.comboList = []
         for i in  range(0,len(labelData)):
             tempX = i%col*(labelX+labelW)+labelX
@@ -107,7 +107,7 @@ class Application(Application_ui):
         if(len(self.ListData)==0):
             showwarning("运行","请先预览")
         else:
-            self.executeShell();
+            self.executeShell()
         pass
     
     def Command4_Cmd(self, event=None):
@@ -132,14 +132,14 @@ class Application(Application_ui):
                          u"sudo ip link set can1 type can bitrate %s " % self.comboData[3][self.comboList[3].current()],
                          u"echo 'can1 bitrate is %s'" % self.comboData[3][self.comboList[3].current()],
                          u"sudo ip link set up can1",
-                         u"echo 'can1 set success!'"];
+                         u"echo 'can1 set success!'"]
         self.List1.delete(1.0,END)
         for item in self.ListData:
             self.List1.insert(END,item+"\n")
         pass
     
     def executeShell(self):
-        str = ';'.join(self.ListData);
+        str = ';'.join(self.ListData)
         os.system(str)
         #运行后自动关闭窗口
         # self._tk.destroy();
