@@ -39,8 +39,8 @@ class Console(tk.Frame):
         self.prompt.pack(side="left", fill="x")
         self.entry = tk.Entry(self.bottom)
         self.entry.bind("<Return>", self.start_thread)
-        self.entry.bind("<Command-a>", lambda e: self.entry.select_range(0, "end"))
-        self.entry.bind("<Command-c>", self.clear)
+        # self.entry.bind("<Command-a>", lambda e: self.entry.select_range(0, "end"))
+        # self.entry.bind("<Command-c>", self.clear)
         self.entry.focus()
         self.entry.pack(side="left", fill="x", expand=True)
 
