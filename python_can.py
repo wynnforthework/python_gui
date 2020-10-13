@@ -4,6 +4,7 @@
 import os
 import sys
 import threading
+import paramiko
 from subprocess import Popen, PIPE
 if sys.version_info[0] == 2:
     from Tkinter import *
@@ -40,11 +41,11 @@ class Application_ui(Frame):
         # 设置主窗口标题
         self.master.title('叶')
         # 设置窗口初始位置在屏幕居中
-        self.master.geometry("%sx%s+%s+%s" % (winWidth, winHeight, x, y))
-        self.createWidgets()
+        self.master.geometry("%sx%s+%s+%s" % (winWidth, winHeight, x, y)) 
+        self.createWidgets()  #声明变量
 
     def createWidgets(self):
-        self.top = self.winfo_toplevel()
+        self.top = self.winfo_toplevel()  #声明窗口名称
 
         labelY = 0.05
         labelW = 0.08
@@ -65,6 +66,7 @@ class Application_ui(Frame):
             tempText = Text(self.top)
             tempText.place(relx=tempX, rely=tempY+labelH, relwidth=labelW,relheight=labelH)
             self.can0Text.append(tempText)
+            
         
         labelData = ["can1","速度","加速度","左转弯","右转弯","刹车","油门","灯光","喇叭"]
         self.can1Text = []
@@ -122,35 +124,44 @@ class Application(Application_ui):
         # print("保存")
         self.canType = 0
         self.text = self.can0
-        self.command = "ping 192.168.31.2"
-        self.start_thread()
+        self.command ="cansend can0 %s#%s%s%s%s%s%s%s%s"  %(self.can0Text[0].get(0.0,END),self.can0Text[1].get(0.0,END),self.can0Text[2].get(0.0,END),self.can0Text[3].get(0.0,END),self.can0Text[4].get(0.0,END),self.can0Text[5].get(0.0,END),self.can0Text[6].get(0.0,END),self.can0Text[7].get(0.0,END),self.can0Text[8].get(0.0,END))
+        #self.start_thread()
+        out = self.conn.exec_command("candump can0")
+        self.show(out)
         pass
 
     def Command2_Cmd(self, event=None):
         # print("重启")
         self.canType = 0
         self.text = self.can0
-        self.clear()
+        self.conn = SSHConnection('192.168.0.114', 22, 'titan', 'titan3',self)
+        #self.command = "ifconfig"
+        #self.clear()
+        #self.start_thread()
         pass
 
     def Command3_Cmd(self, event=None):
         # print("运行")
-        self.canType = 1
-        self.stop()
+        #self.canType = 1
+        #self.stop()
+        self.canType = 0
+        self.text = self.can0
+        self.command = "candump can0"
+        self.start_thread(self)
         pass
     
     def Command4_Cmd(self, event=None):
         # print("预览")
-        self.canType = 1
-        self.text = self.can1
-        self.command = "ping 192.168.31.1"
+        self.canType = 0
+        self.text = self.can0
+        self.command = "titan4"
         self.start_thread(self)
         pass
     
     def Command5_Cmd(self, event=None):
         # print("运行")
-        self.canType = 1
-        self.text = self.can1
+        self.canType = 0
+        self.text = self.can0
         self.clear()
         pass
     
@@ -214,14 +225,25 @@ class Application(Application_ui):
         the output of the execution of self.command"""
         try:
             # self.popen is a Popen object
-            self.popen = Popen(self.command.split(), stdout=PIPE, bufsize=1)
-            lines_iterator = iter(self.popen.stdout.readline, b"")
+            # self.popen = Popen(self.command.split(), stdout=PIPE, bufsize=1)
+            # lines_iterator = iter(self.popen.stdout.readline, b"")
 
-            # poll() return None if the process has not terminated
-            # otherwise poll() returns the process's exit code
-            while self.popen.poll() is None:
+            # # poll() return None if the process has not terminated
+            # # otherwise poll() returns the process's exit code
+            # while self.popen.poll() is None:
+            #     for line in lines_iterator:
+            #         self.show(line.decode("utf-8", 'ignore'))
+            # self.show("Process " + self.command  + " terminated.\n\n")
+
+            if self.conn._client is None:
+                self.conn._client = paramiko.SSHClient()
+                self.conn._client._transport = self.conn._transport
+            stdin, stdout, stderr = self.conn._client.exec_command(self.command)
+            lines_iterator = iter(stdout.readline, b"")
+
+            while stdout.closed is False:
                 for line in lines_iterator:
-                    self.show(line.decode("utf-8", 'ignore'))
+                    self.show(line)
             self.show("Process " + self.command  + " terminated.\n\n")
 
         except FileNotFoundError:
@@ -230,6 +252,59 @@ class Application(Application_ui):
             self.show("No command entered\n\n")
 
         self.stop()
+
+
+class SSHConnection(object):
+    def __init__(self, host, port, username, password,master):
+        self._host = host
+        self._port = port
+        self._username = username
+        self._password = password
+        self._transport = None
+        self._sftp = None
+        self._client = None
+        self._tk = master
+        self._connect()  # 建立连接
+
+    def _connect(self):
+        transport = paramiko.Transport((self._host, self._port))
+        transport.connect(username=self._username, password=self._password)
+        self._transport = transport
+        self._tk.show("连接成功\n")
+
+    #下载
+    def download(self, remotepath, localpath):
+        if self._sftp is None:
+            self._sftp = paramiko.SFTPClient.from_transport(self._transport)
+        self._sftp.get(remotepath, localpath)
+
+    #上传
+    def put(self, localpath, remotepath):
+        if self._sftp is None:
+            self._sftp = paramiko.SFTPClient.from_transport(self._transport)
+        self._sftp.put(localpath, remotepath)
+
+    #执行命令
+    def exec_command(self, command):
+        if self._client is None:
+            self._client = paramiko.SSHClient()
+            self._client._transport = self._transport
+        stdin, stdout, stderr = self._client.exec_command(command)
+
+        data = stdout.read()
+        if len(data) > 0:
+            #print (data.strip())   #打印正确结果
+            return data
+        err = stderr.read()
+        if len(err) > 0:
+            #print (err.strip())    #输出错误结果
+            return err
+
+    def close(self):
+        if self._transport:
+            self._transport.close()
+        if self._client:
+            self._client.close()
 
 if __name__ == "__main__":
     top = Tk()
