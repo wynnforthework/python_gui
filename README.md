@@ -37,6 +37,7 @@ python python_gui.py
 | import tkinter | top = tkinter.Tk()     |
 | import tkinter | as tk	top = tk.Tk() |  
 | from tkinter   | import *	top = Tk()    |  
+
 不同的导入方式更多的是个人习惯，对程序本身没有影响。  
 2.9 第三方库paramiko，第三方库即系统不自带的，有某个人自己写好的功能分享出来，供其它人使用的，使用之前，需要用```pip install paramiko```将库下载到本地，才能在程序中导入。  
 
