@@ -253,7 +253,6 @@ class Application(Application_ui):
 
         self.stop()
 
-
 class SSHConnection(object):
     def __init__(self, host, port, username, password,master):
         self._host = host
