@@ -75,7 +75,7 @@ class Application_ui(Frame):
             tempText.place(relx=tempX, rely=tempY+labelH, relwidth=labelW,relheight=labelH)
             self.sshText.append(tempText)
         
-        labelData = ["速度","CAN0时序","CAN1波特率","右转弯","刹车"];
+        labelData = ["速度","CAN0时序","CAN1波特率","右转弯","刹车"]
         self.comboData = [["1","10","100","1000","10000","20000","50000","80000"],
                      ["2","10","100","1000","10000","20000","50000","80000"],
                      ["3","10","100","1000","10000","20000","50000","80000"],
@@ -184,7 +184,7 @@ class Application(Application_ui):
     
     def Command6_Cmd(self, event=None):
         # showinfo("Exit","敬请期待！")
-        self._tk.destroy();
+        self._tk.destroy()
         pass
     
     def show(self, message):
